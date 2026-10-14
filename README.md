@@ -20,7 +20,7 @@ Claude usage · as of 14:05
 7d 41% ↻ Fri 09:00
 ```
 
-Right-click to choose which window the icon shows, refresh, or exit.
+Right-click to choose which window the icon shows, refresh, start with Windows, or exit.
 
 ## Where the numbers come from
 
@@ -60,11 +60,16 @@ Requires Windows 10 1607 or later and the .NET 10 SDK.
 dotnet run --project src/ClaudeUsageTray
 ```
 
-Or publish a single exe and add it to `shell:startup`:
+To install, publish a single exe somewhere outside the repo (so a running copy does not lock your
+build output), start it, and tick **Start with Windows** in its menu:
 
 ```bash
-dotnet publish src/ClaudeUsageTray -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
+dotnet publish src/ClaudeUsageTray -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o "$LOCALAPPDATA/Programs/ClaudeUsageTray"
 ```
+
+**Start with Windows** writes the per-user `Run` registry key (no admin rights), so the app also
+appears under Settings ▸ Apps ▸ Startup. It registers the exe it is ticked from; ticking it in a
+copy elsewhere repoints the entry. To update, exit the app from its menu, publish again, and start it.
 
 ## Settings
 

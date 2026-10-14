@@ -4,26 +4,33 @@ namespace ClaudeUsageTray;
 internal sealed class TrayIconView : IDisposable
 {
     private readonly NotifyIcon _notifyIcon;
-    private readonly ToolStripMenuItem _refreshItem;
 
     private Icon? _currentIcon;
     private (int? Percent, bool Stale, string Tooltip)? _rendered;
 
     /// <param name="selected">The metric checked in the menu at start.</param>
-    /// <param name="onMetricSelected">Called when the user picks what the icon shows.</param>
-    /// <param name="canRefresh">Asked each time the menu opens; a refused refresh is greyed out rather than silently ignored.</param>
-    /// <param name="onRefresh">Called when the user clicks Refresh.</param>
-    /// <param name="onExit">Called when the user clicks Exit.</param>
-    public TrayIconView(IconMetric selected, Action<IconMetric> onMetricSelected, Func<bool> canRefresh, Action onRefresh, Action onExit)
+    /// <param name="actions">What the menu items call.</param>
+    public TrayIconView(IconMetric selected, TrayMenuActions actions)
     {
-        _refreshItem = new ToolStripMenuItem("Refresh", image: null, (_, _) => onRefresh());
+        var refresh = new ToolStripMenuItem("Refresh", image: null, (_, _) => actions.Refresh());
+        var startWithWindows = new ToolStripMenuItem("Start with Windows");
+        startWithWindows.Click += (_, _) =>
+        {
+            if (actions.SetStartWithWindows(!startWithWindows.Checked))
+                startWithWindows.Checked = !startWithWindows.Checked;
+        };
 
         var menu = new ContextMenuStrip();
-        menu.Opening += (_, _) => _refreshItem.Enabled = canRefresh();
-        menu.Items.Add(BuildMetricMenu(selected, onMetricSelected));
-        menu.Items.Add(_refreshItem);
+        menu.Opening += (_, _) =>
+        {
+            refresh.Enabled = actions.CanRefresh();
+            startWithWindows.Checked = actions.StartsWithWindows();
+        };
+        menu.Items.Add(BuildMetricMenu(selected, actions.SelectMetric));
+        menu.Items.Add(refresh);
+        menu.Items.Add(startWithWindows);
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Exit", image: null, (_, _) => onExit());
+        menu.Items.Add("Exit", image: null, (_, _) => actions.Exit());
 
         _notifyIcon = new NotifyIcon { Visible = true, ContextMenuStrip = menu };
     }

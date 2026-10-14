@@ -30,7 +30,9 @@ internal sealed class TrayApp : ApplicationContext
         _settings = settings;
         _policy = new PollPolicy(TimeSpan.FromSeconds(settings.PollSeconds));
         _limitsClient = new LimitsClient(settings.ResolveConfigDir());
-        _view = new TrayIconView(settings.IconMetric, SelectMetric, CanRefresh, RefreshNow, ExitThread);
+        var startup = StartupRegistration.ForThisExe();
+        _view = new TrayIconView(settings.IconMetric, new TrayMenuActions(
+            SelectMetric, CanRefresh, RefreshNow, startup.IsEnabled, startup.TrySet, ExitThread));
 
         _pollTimer.Tick += async (_, _) => await PollAsync().ConfigureAwait(true);
         _repaintTimer.Tick += (_, _) => Render();

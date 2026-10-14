@@ -8,6 +8,7 @@
     <!-- Needed for IDE0005 (unused usings) to run on build; no XML docs are shipped. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <PublishDocumentationFile>false</PublishDocumentationFile>
     <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
